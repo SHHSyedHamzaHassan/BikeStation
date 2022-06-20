@@ -43,8 +43,8 @@ class BikeStationDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
             tvStationNo.setText(intent.getStringExtra("serialNo"))
             tvNoOfAvailableBikes.setText(intent.getStringExtra("bike"))
             tvNoOfAvailablePlaces.setText(intent.getStringExtra("places"))
-            var lat = intent.getStringExtra("lat")
-            var lng = intent.getStringExtra("lng")
+            var lat = intent.getDoubleExtra("lat",0.0)
+            var lng = intent.getDoubleExtra("lng",0.0)
 
             // Add a marker in Sydney and move the camera
             val sydney = LatLng(lat, lng)
