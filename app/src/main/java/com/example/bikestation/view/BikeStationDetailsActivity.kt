@@ -6,13 +6,28 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.bikestation.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+
+import android.graphics.BitmapFactory
+
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import com.example.bikestation.R
+import android.graphics.drawable.BitmapDrawable
+
+import android.graphics.drawable.Drawable
+import androidx.core.graphics.drawable.DrawableCompat
+
+import android.os.Build
+
+import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.CameraUpdate
 
 
 class BikeStationDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -32,6 +47,14 @@ class BikeStationDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
+
+        getSupportActionBar()?.setBackgroundDrawable(
+            ColorDrawable(Color.parseColor("#000000"))
+        );
+        getSupportActionBar()?.setDisplayShowTitleEnabled(false)
+
+        context = this@BikeStationDetailsActivity
+
         val tvStationName: TextView = findViewById(R.id.tvStationNameDetail)
         val tvStationDistance: TextView = findViewById(R.id.tvStationDistanceDetail)
         val tvNoOfAvailableBikes: TextView = findViewById(R.id.tvNoOfAvailableBikesDetail)
@@ -40,34 +63,54 @@ class BikeStationDetailsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (intent != null) {
             tvStationName.setText(intent.getStringExtra("label"))
-            tvStationNo.setText(intent.getStringExtra("serialNo"))
+            tvStationNo.setText(intent.getStringExtra("serialNo") + " ")
             tvNoOfAvailableBikes.setText(intent.getStringExtra("bike"))
             tvNoOfAvailablePlaces.setText(intent.getStringExtra("places"))
-            var lat = intent.getDoubleExtra("lat",0.0)
-            var lng = intent.getDoubleExtra("lng",0.0)
+            var lat = intent.getDoubleExtra("lat", 0.0)
+            var lng = intent.getDoubleExtra("lng", 0.0)
 
             // Add a marker in Sydney and move the camera
-            val sydney = LatLng(lat, lng)
+            val station = LatLng(lat, lng)
+
+
             mMap.addMarker(
                 MarkerOptions()
-                    .position(sydney)
-                    .title("Marker in Sydney")
+                    .position(station)
+                    .title(intent.getStringExtra("bike"))
+                    .icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            getBitmapFromVectorDrawable(
+                                context,
+                                R.drawable.ic_bike_icon
+                            )
+                        )
+                    )
+            )?.showInfoWindow()
+            //mMap.moveCamera(CameraUpdateFactory.newLatLng(station))
+            val location = CameraUpdateFactory.newLatLngZoom(
+                station, 10f
             )
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+            mMap.animateCamera(location)
 
 
         }
 
 
+    }
 
-
-        getSupportActionBar()?.setBackgroundDrawable(
-            ColorDrawable(Color.parseColor("#000000"))
-        );
-        getSupportActionBar()?.setDisplayShowTitleEnabled(false)
-
-        context = this@BikeStationDetailsActivity
-        
+    fun getBitmapFromVectorDrawable(context: Context?, drawableId: Int): Bitmap {
+        var drawable = ContextCompat.getDrawable(context!!, drawableId)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = DrawableCompat.wrap(drawable!!).mutate()
+        }
+        val bitmap = Bitmap.createBitmap(
+            drawable!!.intrinsicWidth,
+            drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
+        drawable.draw(canvas)
+        return bitmap
     }
 }
 
